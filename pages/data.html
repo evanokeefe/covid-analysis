@@ -1,0 +1,37 @@
+<html>
+    <body bgcolor='AntiqueWhite'>
+        <h1>Data</h1>
+        <p><a href="index.html">Home</a></p>
+        <h3> Main Dataset: </h3>
+            <p> The main dataset used for this project was the John's Hopkins COVID-19 tracker GitHub page using <a 
+                                                                                                             href='https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv'>Confirmed Cases</a> and <a 
+                                                                                                             href='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv'>Number of Deaths</a>
+                This dataset includes the total number of cases for each county within the United States (including territories
+                which were exluded in this project). The dataset has a column for each date since January 22nd 2020 with the 
+                cummalitive sum number of cases. 
+                <br/>For this project only the following columns were used:'Province_State', 'Admin2'(Name of the county), and 'date'. </p>
+        <h3> Auxillary Datasets: </h3>
+            <p> A number of datasets were used from the US Census Bureau including shape and population data: </p>
+            <ul><li> Shape files of the US states. The geometry column was used for mapping and animations while the ALAND (land 
+                    area in m^2) was used to calculate population density 
+                    <a href='https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_nation_5m.zip'> link </a></li>
+                
+                <li> Same as previous however broken down by county rather than state
+                    <a href='https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_500k.zip'> link </a></li>
+                <h4>How To Get Shape Files:</h4>
+                <ul>
+                    <li>In terminal use the following bash command: wget [Link]-o [New File Name]</li>
+                    <li>Link for states: 'https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_nation_5m.zip'</li>
+                    <li>Link for counties: 'https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_500k.zip'</li>
+                    <li>Should be downloaded as zip files</li>
+                </ul><br/>
+                <li> US State population estimations. Only the state names and data for 2019 were used <a href='Annual Estimates 
+                    of the Resident Population for the United States, Regions, States, and Puerto Rico: April 1, 2010 to July 1,
+                    2019 (NST-EST2019-01) '> link </a></li>
+                <li> Same as previous however broken down by county rather than state 
+                    <a href='https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-
+                             annres.xlsx'> link </a></li></ul>
+    </body>
+</html>
+        
+        
