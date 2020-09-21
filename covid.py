@@ -1,5 +1,6 @@
 import requests, io
 import pandas as pd
+from datetime import datetime
 
 def get_data(url):
     """Use the request module to download raw data from Github and load it into a pandas DataFrame
@@ -11,8 +12,41 @@ def get_data(url):
         DataFrame: Resulting pandas dataframe of cases/deaths data
     """
     r = requests.get(url).content
-    df = pd.read_csv(io.StringIO(r.decode('utf-8'))).dropna() #drop missing values as they are ignsignifant in the scope of the project
+    df = pd.read_csv(io.StringIO(r.decode('utf-8'))).dropna().set_index('UID') #drop missing values as they are ignsignifant in the scope of the project
+    df.index.name = None
     return df
+
+def first_date(df):
+    """Gets the column index of the first date (which uses the format 'm/d/y')
+
+    Args:
+        df (DataFram): Pandas dataframe containing the data of US 
+
+    Returns:
+        [int]: The index of the first date column
+    """
+    for idx, header in enumerate(df):
+        try:
+            datetime.strptime(header, "%m/%d/%y")
+            break
+        except:
+            pass
+    return idx
+
+def split_data(df):
+    """Splits the generated dataframe into two, the first with the info on state and county and the second with the numerical case/death data. UID index is consistent across both to relate the two.
+
+    Args:
+        df (DataFrame): Pandas dataframe containing the US
+
+    Returns:
+        [tup]: Tuple containing the text info in index 0 and date info at index 1
+    """
+    first = first_date(df)
+    text_data = df.iloc[:, :first]
+    date_data = df.iloc[:, first:]
+    date_data.columns = pd.to_datetime(date_data.columns)
+    return text_data, date_data
 
 def get_state(df, state, combine=False):
     """Slice the DataFrame to only include data from a specified state
@@ -32,25 +66,6 @@ def get_state(df, state, combine=False):
     if combine:
         df = df.groupby('Province_State').sum()
     return df
-
-from datetime import datetime
-
-def first_date(df):
-    """Gets the column index of the first date (which uses the format 'm/d/y')
-
-    Args:
-        df (DataFram): Pandas dataframe containing the data of US 
-
-    Returns:
-        [int]: The index of the first date column
-    """
-    for idx, header in enumerate(df):
-        try:
-            datetime.strptime(header, "%m/%d/%y")
-            break
-        except:
-            pass
-    return idx
 
 def select_dates(df, start=None, end=None):
     """Allows the user to specify a start and/or end date to select data from
