@@ -2,6 +2,7 @@ import requests, io
 import pandas as pd
 from datetime import datetime
 
+
 def get_data(url):
     """Use the request module to download raw data from Github and load it into a pandas DataFrame.
 
@@ -12,9 +13,11 @@ def get_data(url):
         DataFrame: Resulting pandas dataframe of cases/deaths data.
     """
     r = requests.get(url).content
-    df = pd.read_csv(io.StringIO(r.decode('utf-8'))).dropna().set_index('UID') #drop missing values as they are ignsignifant in the scope of the project
+    df = pd.read_csv(io.StringIO(r.decode('utf-8'))).dropna().set_index(
+        'UID')  # drop missing values as they are insignificant in the scope of the project
     df.index.name = None
     return df
+
 
 def first_date(df):
     """Gets the column index of the first date (which uses the format 'm/d/y').
@@ -33,11 +36,12 @@ def first_date(df):
             pass
     return idx
 
+
 def get_state(df, state, combine=False):
     """Slice the DataFrame to only include data from a specified state.
 
     Args:
-        df (DataFrame): Pandas datafram containing US cases/deaths data.
+        df (DataFrame): Pandas dataframe containing US cases/deaths data.
         state (str, list): The desired state(s) to slice the  data to, a list can be input if multiple state's data is desired.
         combine (bool, optional): Group by state and sum the results for summary or use in plotting.
 
@@ -51,6 +55,7 @@ def get_state(df, state, combine=False):
     if combine:
         df = df.groupby('Province_State').sum()
     return df
+
 
 def select_dates(df, start=None, end=None):
     """Allows the user to specify a start and/or end date to select data from.
@@ -66,32 +71,36 @@ def select_dates(df, start=None, end=None):
     first = first_date(df)
 
     headers = {head: idx for idx, head in enumerate(df.columns)}
-    if start != None and end != None:
+    if start is not None and end is not None:
         df = df.drop(columns=df.columns[first:headers[start]]).drop(columns=df.columns[headers[end]:])
-    elif start != None:
+    elif start is not None:
         df = df.drop(columns=df.columns[first:headers[start]])
-    elif end != None:
+    elif end is not None:
         df = df.drop(columns=df.columns[headers[end]:])
     return df
+
 
 def daily_cases(df, period=1):
     """Takes the difference between columns to calculate the number of daily cases/deaths.
 
-    Args:
-        df (DataFrame): Pandas dataframe containg US cases/deaths the total cases/deaths at a given date.
-        period (int, optional): The number of days to calculate the rolling averegae over. Use default of one for calculating daily cases.
+    Args: df (DataFrame): Pandas dataframe congaing US cases/deaths the total cases/deaths at a given date. period (
+    int, optional): The number of days to calculate the rolling average over. Use default of one for calculating
+    daily cases.
 
     Returns:
         DataFrame: Resulting dataframe containing the number of daily cases/deaths.
     """
     first = first_date(df)
 
-    daily = df.iloc[:, 11:].diff(axis=1, periods=period).dropna(axis=1)/period #drop first column as the diff yields NaN
-    df.update(daily) 
-    return df.drop(columns=df.columns[first]) #drop first date column since it does not have sufficient data
+    daily = df.iloc[:, 11:].diff(axis=1, periods=period).dropna(
+        axis=1) / period  # drop first column as the diff yields NaN
+    df.update(daily)
+    return df.drop(columns=df.columns[first])  # drop first date column since it does not have sufficient data
+
 
 def split_data(df):
-    """Splits the generated dataframe into two, the first with the info on state and county and the second with the numerical case/death data. UID index is consistent across both to relate the two.
+    """Splits the generated dataframe into two, the first with the info on state and county and the second with the
+    numerical case/death data. UID index is consistent across both to relate the two.
 
     Args:
         df (DataFrame): Pandas dataframe containing the US.
@@ -105,32 +114,37 @@ def split_data(df):
     date_data.columns = pd.to_datetime(date_data.columns)
     return text_data, date_data
 
+
 from matplotlib import pyplot as plt
+
 
 def plot_bar(df, num_days='1W'):
     """Plot data in a bar chart using various Matplotlib and Pandas functionality.
 
     Args:
         df (DataFrame): Pandas dataframe containing US case date.
-        num_days (str, optional): Length of time to use in the resampling. Use number followed by letter corresponding to date part (D, W, M, or Y). Defaults to '1W'.
+        num_days (str, optional): Length of time to use in the resampling. Use number followed by letter corresponding
+        to date part (D, W, M, or Y). Defaults to '1W'.
 
     Raises:
-        RuntimeError: raised if the initial dataframe contains too mant rows of data likely resulting from not grouping data. The result will be overly computationally intensive and not plot well.
+        RuntimeError: raised if the initial dataframe contains too many rows of data likely resulting from not grouping
+        data. The result will be overly computationally intensive and not plot well.
 
     Returns:
         plot: Returns a Matplotlib plot of the selected data.
     """
     if max(df.nunique()) > 10:
-        raise RuntimeError('Attempting to plot a DataFrame with more than 10 rows is not reccomended')
+        raise RuntimeError('Attempting to plot a DataFrame with more than 10 rows is not recommended')
     text, date = split_data(df)
     date = date.T.resample(num_days).sum()
 
-    fig, ax = plt.subplots(figsize=(10,10))
+    fig, ax = plt.subplots(figsize=(10, 10))
     date.plot.bar(ax=ax)
     labels = [dt.strftime('%b %d') for dt in date.index]
     ax.set_xticklabels(labels, rotation=-45)
     plt.close()
     return fig
+
 
 def plot_line(df):
     """Plot data in a line chart.
@@ -139,13 +153,14 @@ def plot_line(df):
         df (DataFrame): Pandas dataframe containing US case data.
 
     Raises:
-        RuntimeError: raised if the initial dataframe contains too mant rows of data likely resulting from not grouping data. The result will be overly computationally intensive and not plot well.
+        RuntimeError: raised if the initial dataframe contains too many rows of data likely resulting from not grouping
+         data. The result will be overly computationally intensive and not plot well.
 
     Returns:
         plot: Returns a Matplotlib plot of the selected data.
     """
     if max(df.nunique()) > 10:
-        raise RuntimeError('Attempting to plot a DataFrame with more than 10 rows is not reccomended')
+        raise RuntimeError('Attempting to plot a DataFrame with more than 10 rows is not recommended')
     idx = first_date(df)
     plot = df.iloc[:, idx:].T.plot()
     return plot
